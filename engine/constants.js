@@ -4,10 +4,10 @@ exports.TILE_SZ = 50;
 
 exports.PLAYER_SZ = 30;
 exports.PLAYER_SPEED = 4;
-exports.MAX_BOMBS = 1;
+exports.MAX_BOMBS = 3;
 
 exports.BOMB_BASE_TIME = 3000;
-exports.BOMB_STRENGTH = 2;
+exports.BOMB_STRENGTH = 4;
 
 exports.BLAST_TIME = 1000;
 
