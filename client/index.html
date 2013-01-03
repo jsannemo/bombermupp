@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="style.css" type="text/css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.10/socket.io.min.js"></script>
+    <script type="text/javascript" src="input.js" defer></script>
+    <script type="text/javascript" src="draw.js" defer></script>
+  </head>
+  <body>
+    <h1>BomberMupp</h1>
+    <canvas id="bomber" width="550px" height="550px"></canvas>
+    <p>Controls:<p>
+    <dl>
+      <dt>[wasd] / [arrow keys] / [tfgh] / [ijkl]<dd>Player Blue / Red / Green / Yellow: Up/left/down/right 
+      <dt>space / enter / r / u<dd>Player Blue / Red / Green / Yellow: Bomb
+    </dl>
+  </body>
+  <script>
+    var socket = io.connect("http://localhost:1337");
+
+    var game = {
+      ctx: document.getElementById("bomber").getContext("2d")
+    };
+
+    socket.on("connect", function () {
+      socket.emit("init");
+    });
+    socket.on("settings", function(data){
+      game.GAME_SZ = data.GAME_SZ;
+      game.TILE_SZ = data.TILE_SZ;
+      game.PLAYER_SZ = data.PLAYER_SZ;
+    });
+    socket.on("controls", function(data){
+      var controls = data.controls;
+      game.controls = controls;
+      var input = new Input(controls[0], controls[1], controls[2], controls[3], controls[4]);
+      window.setInterval(function(){
+        socket.emit("input", {left: input.left, up:input.up, right:input.right, down:input.down, bomb:input.bomb});
+      }, 100);
+    });
+    socket.on("update", function(data){
+      game.players = data.players;
+      game.tiles = data.tiles;
+      game.bombs = data.bombs;
+      drawAll(game);
+    });
+  </script>
+</html>
