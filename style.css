@@ -1,0 +1,9 @@
+html {
+  overflow-y: hidden;
+  overflow-x: auto;
+}
+canvas#bomber {
+  width: 550px;
+  height: 550px;
+  border: 1px solid #000000;
+}
