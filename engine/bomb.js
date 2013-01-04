@@ -25,9 +25,10 @@ var BombType = {
         var ny = y + dy*i;
         if(nx >= 0 && ny >= 0 && nx < game.map.width && ny < game.map.height){
           var status = game.map.tiles[ny][nx].blast();
+          console.log(ny+" "+nx+" "+status[0]+" "+status[1]);
           if(status[1]) game.blastTime[ny][nx] = game.clock;
           if(status[0]) break;
-        }
+        } else break;
       }
     }
     sub(0, -1);

@@ -28,6 +28,7 @@ function drawPlayers(/*Game*/game){
   var ctx = game.ctx;
   for(var i = 0; i<game.players.length; i++){
     var player = game.players[i];
+    if(!player.alive) continue;
     ctx.fillStyle = playerColors[i];
     ctx.fillRect(player.x, player.y, game.PLAYER_SZ, game.PLAYER_SZ);
   }

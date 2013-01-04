@@ -21,6 +21,7 @@ function Game(/*Array[Input]*/playerInputs, /*Map*/map, /*Array[Socket]*/sockets
 Game.prototype.start = function(){
   console.log("Starting!");
   this.clock = Date.now();
+  this.lastPush = Date.now();
   this.initPlayers();
   this.tick();
 }
@@ -46,10 +47,14 @@ Game.prototype.tick = function(){
     this.checkBlasts();
     this.checkDeaths();
     this.movePlayers();
-    game.clock = currentTime;
+    this.clock = currentTime;
   }
-  for(var i = 0; i < game.playerCount; i++){
-    this.pushState(i);
+  
+  if(currentTime - this.lastPush > 100){
+    for(var i = 0; i < this.playerCount; i++){
+      this.pushState(i);
+    } 
+    this.lastPush = currentTime;
   }
   
   setTimeout(function(){
@@ -164,6 +169,11 @@ Game.prototype.bomb = function(/*Player*/player){
     console.log("Game.bomb() can bomb!");
     player.bomb();
     var playerPos = player.getTile();
+    for(var i = 0; i<this.bombs.length; i++){
+      if(this.bombs[i].y == playerPos[0] && this.bombs[i].x == playerPos[1]){
+        return false;
+      }
+    }
     this.bombs.push(new bomb.Bomb(this.clock, playerPos[0], playerPos[1], player, player.bombType));
   }
 }

@@ -18,7 +18,7 @@
     </dl>
   </body>
   <script>
-    var socket = io.connect("http://localhost:1337");
+    var socket = io.connect("http://"+document.domain+":9501");
 
     var game = {
       ctx: document.getElementById("bomber").getContext("2d")

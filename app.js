@@ -24,7 +24,7 @@ var app = http.createServer(function (req, res) {
       filestream.pipe(res);
     }
   });
-}).listen(1337, "127.0.0.1");
+}).listen(9501, "0.0.0.0");
 
 var websocket = io.listen(app);
 
@@ -83,5 +83,3 @@ function startGame(){
   console.log("Game setup");
   theGame.start();
 }
-
-console.log("Server running at http://127.0.0.1:1337/");

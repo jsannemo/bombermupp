@@ -38,7 +38,7 @@ Player.prototype.bomb = function(){
   this.bombsNow++;
 }
 Player.prototype.canBomb = function(){
-  return this.bombsNow < this.bombsMax && this.alive;
+  return (this.bombsNow < this.bombsMax) && this.alive;
 }
 
 Player.prototype.blast = function(){
