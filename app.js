@@ -37,6 +37,10 @@ var queue = {
   
 };
 
+var socketQueue = {
+  
+};
+
 queue[2] = {};
 queue[3] = {};
 queue[4] = {};
@@ -60,8 +64,13 @@ websocket.sockets.on("connection", function(socket){
       q = queue[players][roomName] = [];
     }
     q.push(socket);
+    socketQueue[socket] = [players, roomName];
     if(q.length == players){
       startGame(players, roomName);
+    } else {
+      for(var i = 0; i<q.length; i++){
+        q[i].emit("queue", {players: q.length});
+      }
     }
   });
   
@@ -73,7 +82,7 @@ websocket.sockets.on("connection", function(socket){
 
 function startGame(pc, roomName){
   var players = queue[pc][roomName];
-  delete queue[pc][roomName];
+  queue[pc][roomName] = [];
   var inputs = [];
   var inputMap = {};
   for(var i = 0; i<players.length; i++){

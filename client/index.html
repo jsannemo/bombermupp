@@ -17,7 +17,8 @@
       <dt>space</dt><dd>Player Blue / Red / Green / Yellow: Bomb</dd>
     </dl>
     <p>
-      Players: <span id="players"></span>
+      <!--<button onclick="go()">Start now (only when players >= 2)</button>-->
+      Players: <span id="current"></span>/<span id="players"></span>
       Room name: "<span id="room"></span>"
     </p>
   </body>
@@ -27,7 +28,6 @@
     var game = {
       ctx: document.getElementById("bomber").getContext("2d")
     };
-
     socket.on("connect", function () {
       var playerCount = Math.max(2, Math.min(4,parseInt(prompt("How many players? [2-4]"))));
       var room = prompt("Room? (enter random for random player)");
@@ -40,6 +40,10 @@
       game.TILE_SZ = data.TILE_SZ;
       game.PLAYER_SZ = data.PLAYER_SZ;
     });
+    socket.on("queue", function(data){
+      var players = data.players;
+      $("#current").text(players);
+    });
     socket.on("controls", function(data){
       var controls = data.controls;
       game.controls = controls;
@@ -48,6 +52,9 @@
         socket.emit("input", {left: input.left, up:input.up, right:input.right, down:input.down, bomb:input.bomb});
       }, 100);
     });
+    function go(){
+      socket.emit("go");
+    }
     socket.on("update", function(data){
       game.players = data.players;
       game.tiles = data.tiles;
