@@ -1,8 +1,9 @@
 var constants = require('./constants.js');
 var Rectangle = require('./rectangle.js').Rectangle;
 
-function Map(/*Array[Array[Tile]]*/tiles, /*Array[Array[Number]]*/positions){
-  this.positions = positions;
+function Map(/*MapType*/mapType){
+  var tiles = mapType.tiles;
+  this.positions = map.positions;
   this.height = tiles.length;
   this.width = tiles[0].length;
   
@@ -63,8 +64,9 @@ var TileType = {
 exports.Map = Map;
 
 exports.Maps = [
-  
-  [
+  {
+    name:"Map 1",
+    tiles: 
     ["..xxxxxxx..",
     ".#x#x#x#x#.",
     "xxxxxxxxxxx",
@@ -76,7 +78,6 @@ exports.Maps = [
     "xxxxxxxxxxx",
     ".#x#x#x#x#.",
     "..xxxxxxx.."],
-    
-    [[0, 0], [10, 10], [10, 0], [0, 10]]
-  ]
+    positions: [[0, 0], [10, 10], [10, 0], [0, 10]]
+  }
 ];

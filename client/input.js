@@ -16,32 +16,34 @@ function Input(/*Number*/left, /*Number*/up, /*Number*/right, /*Number*/down, /*
 
 Input.prototype.createListeners = function(){
   var input = this;
-  $("body").keydown(function(e){
-    if(e.which == input.LEFT){
-      input.left = true;
-    } else if(e.which == input.UP){
-      input.up = true;
-    } else if(e.which == input.RIGHT){
-      input.right = true;
-    } else if(e.which == input.DOWN){
-      input.down = true;
-    } else if(e.which == input.BOMB){
-      input.bomb = true;
+  
+  var updater = function(e, x){
+    var change = false;
+    if(e.which == input.LEFT && input.left != x){
+      input.left = x;
+      update = true;
+    } else if(e.which == input.UP && input.up != x){
+      input.up = x;
+      updated = true;
+    } else if(e.which == input.RIGHT && input.right != x){
+      input.right = x;
+      updated = true;
+    } else if(e.which == input.DOWN && input.down != x){
+      input.down = x;
+      updated = true;
+    } else if(e.which == input.BOMB && input.bomb != x){
+      input.bomb = x;
+      updated = true;
+    }
+    if(updated){
       socket.emit("input", {left: input.left, up:input.up, right:input.right, down:input.down, bomb:input.bomb});
     }
+  };
+  
+  $("body").keydown(function(e){
+    updater(e, true);
   });
   $("body").keyup(function(e){
-    if(e.which == input.LEFT){
-      input.left = false;
-    } else if(e.which == input.UP){
-      input.up = false;
-    } else if(e.which == input.RIGHT){
-      input.right = false;
-    } else if(e.which == input.DOWN){
-      input.down = false;
-    } else if(e.which == input.BOMB){
-      input.bomb = false;
-      socket.emit("input", {left: input.left, up:input.up, right:input.right, down:input.down, bomb:input.bomb});
-    }
+    updater(e, false);
   });
 }

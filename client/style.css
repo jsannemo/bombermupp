@@ -8,8 +8,19 @@ html {
   margin-left: auto;
   margin-right: auto;
 }
+#game,
+#waiting {
+  display: none;
+}
 canvas#bomber {
   width: 550px;
   height: 550px;
   border: 1px solid #000000;
+}
+.form-create input,
+.form-create select {
+  float: right;
+}
+.form-create div {
+  margin: 10px 0 10px 0;
 }

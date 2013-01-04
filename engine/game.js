@@ -19,7 +19,7 @@ function Game(/*Array[Input]*/playerInputs, /*Map*/map, /*Array[Socket]*/sockets
 }
 
 Game.prototype.start = function(){
-  console.log("Starting!");
+  console.log("Starting game");
   this.clock = Date.now();
   this.lastPush = Date.now();
   this.initPlayers();
@@ -170,9 +170,7 @@ Game.prototype.movePlayers = function(){
 }
 
 Game.prototype.bomb = function(/*Player*/player){
-  console.log("Game.bomb() player "+player.index);
   if(player.canBomb()){
-    console.log("Game.bomb() can bomb!");
     var playerPos = player.getTile();
     for(var i = 0; i<this.bombs.length; i++){
       if(this.bombs[i].y == playerPos[0] && this.bombs[i].x == playerPos[1]){
@@ -197,7 +195,6 @@ Game.prototype.tryMove = function(/*Player*/player, /*Number*/dy, /*Number*/dx){
       var tile = this.map.tiles[y][x];
       var other = tile.rectangle;
       var intersects = other.circleIntersects(player.y, player.x, constants.PLAYER_SZ);
-      console.log(y+" "+x+" intersects player "+player.y+" "+player.x+" rad "+constants.PLAYER_SZ);
       if(!tile.walkable){
         if(intersects){
           valid = false;

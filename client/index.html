@@ -9,60 +9,110 @@
     <script type="text/javascript" src="input.js" defer></script>
     <script type="text/javascript" src="draw.js" defer></script>
   </head>
-  <body>
-  <section id="main">
+  <body> 
+    <div id="main">
       <h1>BomberMupp</h1>
-    <canvas id="bomber" width="550px" height="550px"></canvas>
-    <p>Controls:<p>
-    <dl>
-      <dt>[arrow keys]</dt><dd>Player Blue / Red / Green / Yellow: Up/left/down/right </dd>
-      <dt>space</dt><dd>Player Blue / Red / Green / Yellow: Bomb</dd>
-    </dl>
-    <p>
-      <!--<button onclick="go()">Start now (only when players >= 2)</button>-->
-      Players: <span id="current"></span>/<span id="players"></span>
-      Room name: "<span id="room"></span>"
-    </p>
-</section>
+      <section id="rooms">
+        <h2>Create a new room</h2>
+        <form class="form-create">
+          <div><label for="playerNumber">Max players:</label><input id="playerNumber" name="playerNumber" type="number" value="2" min="2" max="4" step="1"/></div>
+          <div><label for="public">Anyone can join?</label><input id="public" name="public" type="checkbox"/></div>
+          <div><label for="map">Map:</label><select id="map" name="map"></select></div>
+          <button onclick="sendCreate(); return false;">Create game</button>
+        </form>
+        <hr>
+        <h2>Join an existing room</h2>
+      </section>
+      <section id="waiting">
+        <p>
+          <div>Players: <span id="currentPlayers"></span>/<span id="maxPlayers"></span></div>
+          <div>Room link: <span id="roomLink"></span></iv>
+        </p>
+      <section>
+      <section id="game">
+        <canvas id="bomber" width="550px" height="550px"></canvas>
+        <p>Controls:<p>
+        <dl>
+          <dt>[arrow keys]</dt><dd>Player Blue / Red / Green / Yellow: Up/left/down/right </dd>
+          <dt>space</dt><dd>Player Blue / Red / Green / Yellow: Bomb</dd>
+        </dl>
+      </section>
+    </div>
   </body>
   <script>
     var socket = io.connect("http://"+document.domain+":9501");
-
-    var game = {
-      ctx: document.getElementById("bomber").getContext("2d")
-    };
-    socket.on("connect", function () {
-      var playerCount = Math.max(2, Math.min(4,parseInt(prompt("How many players? [2-4]"))));
-      var room = prompt("Room? (enter random for random player)");
-      $("#players").text(playerCount);
-      $("#room").text(room);
-      socket.emit("init", {players: playerCount , roomName:room});
+    var currentToken;
+    socket.on("connect", function(){
+      console.log("Connected to server");
+      var tok = window.location.search.substring(1);
+      if(tok){
+        console.log("Joining token "+tok);
+        socket.emit("join-game", {token: tok});
+      }
     });
-    socket.on("settings", function(data){
-      game.GAME_SZ = data.GAME_SZ;
-      game.TILE_SZ = data.TILE_SZ;
-      game.PLAYER_SZ = data.PLAYER_SZ;
+    socket.on("maps", function(data){
+      console.log("Recieved maps!");
+      var mapData = data.mapData;
+      for(var i = 0; i<mapData.length; i++){
+        var name = mapData[i].name;
+        var preview = mapData[i].tiles;
+        $("#map").append($("<option></option>").val(i).html(name));
+      }
     });
-    socket.on("queue", function(data){
-      var players = data.players;
-      $("#current").text(players);
-    });
-    socket.on("controls", function(data){
-      var controls = data.controls;
-      game.controls = controls;
-      var input = new Input(controls[0], controls[1], controls[2], controls[3], controls[4]);
-      window.setInterval(function(){
-        socket.emit("input", {left: input.left, up:input.up, right:input.right, down:input.down, bomb:input.bomb});
-      }, 100);
-    });
-    function go(){
-      socket.emit("go");
+    function sendCreate(){
+      var players = $("#playerNumber").val();
+      var public = $("#public").attr('checked') ? true : false;
+      var map = $("#map").val();
+      socket.emit("create-game", {players: players, public: public, map: map});
     }
-    socket.on("update", function(data){
-      game.players = data.players;
-      game.tiles = data.tiles;
-      game.bombs = data.bombs;
-      drawAll(game);
+    socket.on("create-game-error", function(data){
+      alert(data.msg);
     });
+    socket.on("join-error", function(data){
+      alert(data.msg);
+    });
+    socket.on("room-closed", function(data){
+      alert(data.msg);
+      window.history.pushState({}, "BomberMupp", "http://"+document.domain+":9501");
+      currentToken = null;
+      showReg();
+    });
+    socket.on("join", function(data){
+      currentToken = data.token;
+      console.log("Joined", currentToken);
+      showWait();
+      if(data.admin){
+        displayAdmin(true);
+      }
+      window.history.pushState({}, "BomberMupp", "http://"+document.domain+":9501?"+currentToken);
+    });
+    socket.on("game-info", function(data){
+      var token = data.token;
+      if(token == currentToken){
+        $("#roomLink").text("http://"+document.domain+":9501?"+token);
+        $("#currentPlayers").text(data.players);
+        $("#maxPlayers").text(data.max);
+      } else {
+        console.log("Got info for token "+token);
+      }
+    });
+
+    function displayAdmin(val){
+    }
+
+
+    function showWait(){
+      $("#rooms").hide();
+      $("#waiting").show();
+      $("#game").hide();
+      display(false);
+    }
+
+    function showReg(){
+      $("#rooms").show();
+      $("#waiting").hide();
+      $("#game").hide();
+      displayAdmin(false);
+    }
   </script>
 </html>

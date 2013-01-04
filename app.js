@@ -4,6 +4,7 @@ var fs = require('fs');
 var path = require('path');
 var url = require('url');
 var io = require('socket.io');
+var crypto = require('crypto');
 
 var app = http.createServer(function (req, res) {
   var urlPath = url.parse(req.url).pathname;
@@ -33,92 +34,98 @@ var game = require("./engine/game.js");
 var map = require("./engine/map.js");
 var Input = require("./engine/input.js").Input;
 
-var queue = {
-  
-};
+var games = {};
+var socketGames = {};
 
-var socketQueue = {
-  
-};
-
-queue[2] = {};
-queue[3] = {};
-queue[4] = {};
-
-websocket.set('log level', 1);
+//websocket.set('log level', 1);
 websocket.sockets.on("connection", function(socket){
   console.log("Client connect");
   
-  socket.on("init", function(data){
-    var players = parseInt(data.players);
-    if(players < 2 || players > 4 || !(players >= 2 && players <= 4)) players = 2;
-    if(queue[players] == undefined) players = 2;
-    var roomName = data.roomName || "default";
-    socket.emit("settings", {
-      GAME_SZ: constants.GAME_SZ,
-      PLAYER_SZ: constants.PLAYER_SZ,
-      TILE_SZ: constants.TILE_SZ
-    });
-    var q = queue[players][roomName];
-    if(q == undefined){
-      q = queue[players][roomName] = [];
-    }
-    q.push(socket);
-    socketQueue[socket] = [players, roomName];
-    if(q.length == players){
-      startGame(players, roomName);
-    }
-    for(var i = 0; i<q.length; i++){
-      q[i].emit("queue", {players: q.length});
-    }
-    
+  socket.emit("maps", { mapData: map.Maps });
+  console.log("Sent maps to client");
+  
+  socket.on("create-game", function(data){
+    createGame(socket, data);
+  });
+  
+  socket.on("join-game", function(data){
+    joinGame(socket, data.token);
   });
   
   socket.on("disconnect", function(){
-    que = socketQueue[socket];
-    if(que){
-      try {
-        var q = queue[que[0]][que[1]];
-        var nq = [];
-        for(var i = 0; i<q.length; i++){
-          if(q[i] != socket){
-            nq.push(q[i]);
+    var gameId = socketGames[socket];
+    if(gameId){
+      delete socketGames[socket];
+      var game = games[gameId];
+      if(game){
+        if(game.admin == socket){
+          for(var i = 0; i<game.players.length; i++){
+            game.players[i].emit("room-closed", {msg: "The room creator left"});
+          }
+          delete games[gameId];
+        } else {
+          var newPlayers = [];
+          for(var i = 0; i < game.players.length; i++){
+            if(game.players[i] != socket){
+              newPlayers.push(game.players[i]);
+            }
+          }
+          game.players = newPlayers;
+          for(var i = 0; i < game.players.length; i++){
+            sendGameInfo(game.players[i], gameId);
           }
         }
-        queue[que[0]][que[1]] = nq;
-        for(var i = 0; i<nq.length; i++){
-          nq[i].emit("queue", {players: nq.length});
-        }
-      } catch(e){
       }
     }
   });
-  
 });
 
-function startGame(pc, roomName){
-  var players = queue[pc][roomName];
-  queue[pc][roomName] = [];
-  var inputs = [];
-  var inputMap = {};
-  for(var i = 0; i<players.length; i++){
-    var socket = players[i];
-    var input = new Input();
-    (function(inp, sock){
-      sock.on("input", function(data){
-        inp.left = data.left || false;
-        inp.up = data.up || false;
-        inp.right = data.right || false;
-        inp.down = data.down || false;
-        inp.bomb = data.bomb || false;
-    });
-    })(input, socket);
-    inputs.push(input);
-    socket.emit("controls", {controls: constants.PLAYER_CONTROLS[i]});
+function joinGame(socket, token){
+  if(!games[token]){
+    socket.emit("join-error", {msg: "The room doesn't exist'"});
+  } else {
+    var game = games[token];
+    if(game.players.length == game.max){
+      socket.emit("join-error", {msg: "The room is full"});
+      return;
+    }
+    game.players.push(socket);
+    socketGames[socket] = token;
+    socket.emit("join", {token: token});
+    for(var i = 0; i < game.players.length; i++){
+      sendGameInfo(game.players[i], token);
+    }
   }
-  var mapType = map.Maps[0];
-  var gameMap = new map.Map(mapType[0], mapType[1]);
-  var theGame = new game.Game(inputs, gameMap, players);
-  console.log("Game setup");
-  theGame.start();
+}
+
+function sendGameInfo(socket, token){
+  var game = games[token];
+  if(game){
+    socket.emit("game-info", {token: token, players: game.players.length, max: game.max, map: game.map});
+  }
+}
+
+function createGame(socket, data){
+  var players = parseInt(data.players, 10);
+  if(isNaN(players) || players < 2 || players > 4){
+    socket.emit("create-game-error", {msg: "Enter an integer between 2-4"});
+  }
+  var mapId = parseInt(data.map, 10);
+  if(isNaN(mapId) || mapId < 0 || mapId >= map.Maps.length){
+    socket.emit("create-game-error", {msg: "Choose a map"});
+  }
+  var public = Boolean(data.public);
+  console.log("Create room with", players, "players, map", mapId, "public?", public);
+  crypto.randomBytes(10, function(ex, buf) {
+    var token = buf.toString('hex');
+    games[token] = {
+      max: players,
+      public: public,
+      map: mapId,
+      admin: socket,
+      players: []
+    };
+    socketGames[socket] = token;
+    joinGame(socket, token);
+  });
 }

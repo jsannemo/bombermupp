@@ -18,7 +18,20 @@ html {
   margin-right: auto;
 }
 
+#game, #waiting {
+  display: none;
+}
+
 canvas#bomber {
   .dimensions(550px, 550px);
   .border();
+}
+
+.form-create {
+  input, select {
+    float: right;
+  }
+  div {
+    margin: 10px 0 10px 0;
+  }
 }
