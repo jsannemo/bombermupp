@@ -27,6 +27,7 @@ Input.prototype.createListeners = function(){
       input.down = true;
     } else if(e.which == input.BOMB){
       input.bomb = true;
+      socket.emit("input", {left: input.left, up:input.up, right:input.right, down:input.down, bomb:input.bomb});
     }
   });
   $("body").keyup(function(e){
@@ -40,6 +41,7 @@ Input.prototype.createListeners = function(){
       input.down = false;
     } else if(e.which == input.BOMB){
       input.bomb = false;
+      socket.emit("input", {left: input.left, up:input.up, right:input.right, down:input.down, bomb:input.bomb});
     }
   });
 }
