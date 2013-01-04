@@ -180,17 +180,28 @@ Game.prototype.bomb = function(/*Player*/player){
 
 Game.prototype.tryMove = function(/*Player*/player, /*Number*/dy, /*Number*/dx){
   var valid = true;
+  var currentTile = player.getTile();
   player.move(dy, dx);
   if(player.x < 0 || player.y < 0 || player.x  + constants.PLAYER_SZ >= constants.GAME_SZ|| player.y + constants.PLAYER_SZ >= constants.GAME_SZ){
     valid = false;
   }
+  var newTile = player.getTile();
   for(var y = 0; valid && y < this.map.height; y++){
     for(var x = 0; valid && x < this.map.width; x++){
       var tile = this.map.tiles[y][x];
       var rect = player.getBoundingBox();
+      var other = tile.rectangle;
+      var intersects = rect.intersects(other);
       if(!tile.walkable){
-        var other = tile.rectangle;
-        if(rect.intersects(other)){
+        if(intersects){
+          valid = false;
+        }
+      } else if(newTile[0] == y && newTile[1] == x) {
+        var hasBomb = false;
+        for(var i = 0; i<this.bombs.length; i++){
+          if(this.bombs[i].x == x && this.bombs[i].y == y) hasBomb = true;
+        }
+        if(hasBomb && (y != currentTile[0] || x != currentTile[1])){
           valid = false;
         }
       }

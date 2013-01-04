@@ -18,7 +18,7 @@ function drawTiles(/*Game*/game){
   for(var i = 0; i<game.tiles.length; i++){
     var tile = game.tiles[i];
     ctx.fillStyle = tile.blast ? "#FF0000" : tile.color;
-    ctx.fillRect(tile.x*tileWidth, tile.y*tileHeight, game.TILE_SZ-0.3, game.TILE_SZ-0.3); //TODO: ahem..
+    ctx.fillRect(tile.x*tileWidth, tile.y*tileHeight, game.TILE_SZ, game.TILE_SZ); //TODO: ahem..
   }
 }
 
