@@ -47,7 +47,8 @@ websocket.sockets.on("connection", function(socket){
   
   socket.on("init", function(data){
     var players = parseInt(data.players);
-    if(players < 2 || players > 4) players = 2;
+    if(players < 2 || players > 4 || !(players >= 2 && players <= 4)) players = 2;
+    if(queue[players] == undefined) players = 2;
     var roomName = data.name || "default";
     socket.emit("settings", {
       GAME_SZ: constants.GAME_SZ,
