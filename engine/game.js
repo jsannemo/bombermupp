@@ -167,13 +167,13 @@ Game.prototype.bomb = function(/*Player*/player){
   console.log("Game.bomb() player "+player.index);
   if(player.canBomb()){
     console.log("Game.bomb() can bomb!");
-    player.bomb();
     var playerPos = player.getTile();
     for(var i = 0; i<this.bombs.length; i++){
       if(this.bombs[i].y == playerPos[0] && this.bombs[i].x == playerPos[1]){
         return false;
       }
     }
+    player.bomb();
     this.bombs.push(new bomb.Bomb(this.clock, playerPos[0], playerPos[1], player, player.bombType));
   }
 }
