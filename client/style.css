@@ -2,6 +2,12 @@ html {
   overflow-y: hidden;
   overflow-x: auto;
 }
+#main {
+  width: 550px;
+  height: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
 canvas#bomber {
   width: 550px;
   height: 550px;

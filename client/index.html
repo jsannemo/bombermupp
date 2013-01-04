@@ -9,7 +9,8 @@
     <script type="text/javascript" src="draw.js" defer></script>
   </head>
   <body>
-    <h1>BomberMupp</h1>
+  <section id="main">
+      <h1>BomberMupp</h1>
     <canvas id="bomber" width="550px" height="550px"></canvas>
     <p>Controls:<p>
     <dl>
@@ -21,6 +22,7 @@
       Players: <span id="current"></span>/<span id="players"></span>
       Room name: "<span id="room"></span>"
     </p>
+</section>
   </body>
   <script>
     var socket = io.connect("http://"+document.domain+":9501");
