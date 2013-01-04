@@ -33,8 +33,8 @@ Game.prototype.initPlayers = function(){
   
   var positions = this.map.positions;
   for(var i = 0; i<this.playerCount; i++){
-    var realX = positions[i][1]*constants.TILE_SZ + constants.PLAYER_SZ/2;
-    var realY = positions[i][0]*constants.TILE_SZ + constants.PLAYER_SZ/2;
+    var realX = (positions[i][1]+0.5)*constants.TILE_SZ;
+    var realY = (positions[i][0]+0.5)*constants.TILE_SZ;
     this.players.push(new player.Player(realY, realX, i, this.inputs[i]));
   }
 }
@@ -147,15 +147,21 @@ Game.prototype.movePlayers = function(){
     var dy = 0;
     if(input.down){
       dy = constants.PLAYER_SPEED;
-    } else if(input.up){
+    }
+    if(input.up){
       dy = -constants.PLAYER_SPEED;
-    } else if(input.left){
+    }
+    if(input.left){
       dx = -constants.PLAYER_SPEED;
-    } else if(input.right){
+    }
+    if(input.right){
       dx = constants.PLAYER_SPEED;
     }
-    if(dx || dy){
-      this.tryMove(player, dy, dx);
+    if(dx){
+      this.tryMove(player, 0, dx);
+    }
+    if(dy){
+      this.tryMove(player, dy, 0);
     }
     if(input.bomb){
       this.bomb(player);
@@ -189,9 +195,9 @@ Game.prototype.tryMove = function(/*Player*/player, /*Number*/dy, /*Number*/dx){
   for(var y = 0; valid && y < this.map.height; y++){
     for(var x = 0; valid && x < this.map.width; x++){
       var tile = this.map.tiles[y][x];
-      var rect = player.getBoundingBox();
       var other = tile.rectangle;
-      var intersects = rect.intersects(other);
+      var intersects = other.circleIntersects(player.y, player.x, constants.PLAYER_SZ);
+      console.log(y+" "+x+" intersects player "+player.y+" "+player.x+" rad "+constants.PLAYER_SZ);
       if(!tile.walkable){
         if(intersects){
           valid = false;

@@ -17,13 +17,9 @@ function Player(/*Number*/y, /*Number*/x, /*Number*/index, /*Input*/input){
   this.bombType = BombType.cross;
 }
 
-Player.prototype.getBoundingBox = function(){
-  return new Rectangle(this.x, this.y, constants.PLAYER_SZ, constants.PLAYER_SZ);
-}
-
 Player.prototype.getTile = function(){
-  var centerX = this.x + (constants.PLAYER_SZ/2);
-  var centerY = this.y + (constants.PLAYER_SZ/2);
+  var centerX = this.x;
+  var centerY = this.y;
   var tileX = Math.floor(centerX/constants.TILE_SZ);
   var tileY = Math.floor(centerY/constants.TILE_SZ);
   return [tileY, tileX];

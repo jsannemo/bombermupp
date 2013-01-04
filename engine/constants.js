@@ -2,7 +2,7 @@ exports.GAME_SZ = 550;
 exports.GAME_TILES = 11;
 exports.TILE_SZ = 50;
 
-exports.PLAYER_SZ = 30;
+exports.PLAYER_SZ = 15;
 exports.PLAYER_SPEED = 4;
 exports.MAX_BOMBS = 3;
 
