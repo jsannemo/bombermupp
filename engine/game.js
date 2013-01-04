@@ -121,7 +121,7 @@ Game.prototype.checkBombs = function(){
   for(var i = 0; i<this.bombs.length; i++){
     var bomb = this.bombs[i];
     var since = this.clock - bomb.time;
-    if(since < constants.BOMB_BASE_TIME){
+    if(since < constants.BOMB_BASE_TIME && !this.blastTime[bomb.y][bomb.x]){
       newBombs.push(bomb);
     } else {
       //boom!
