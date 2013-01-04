@@ -53,7 +53,7 @@ websocket.sockets.on("connection", function(socket){
     var players = parseInt(data.players);
     if(players < 2 || players > 4 || !(players >= 2 && players <= 4)) players = 2;
     if(queue[players] == undefined) players = 2;
-    var roomName = data.name || "default";
+    var roomName = data.roomName || "default";
     socket.emit("settings", {
       GAME_SZ: constants.GAME_SZ,
       PLAYER_SZ: constants.PLAYER_SZ,
@@ -67,15 +67,31 @@ websocket.sockets.on("connection", function(socket){
     socketQueue[socket] = [players, roomName];
     if(q.length == players){
       startGame(players, roomName);
-    } else {
-      for(var i = 0; i<q.length; i++){
-        q[i].emit("queue", {players: q.length});
-      }
     }
+    for(var i = 0; i<q.length; i++){
+      q[i].emit("queue", {players: q.length});
+    }
+    
   });
   
   socket.on("disconnect", function(){
-    
+    que = socketQueue[socket];
+    if(que){
+      try {
+        var q = queue[que[0]][que[1]];
+        var nq = [];
+        for(var i = 0; i<q.length; i++){
+          if(q[i] != socket){
+            nq.push(q[i]);
+          }
+        }
+        queue[que[0]][que[1]] = nq;
+        for(var i = 0; i<nq.length; i++){
+          nq[i].emit("queue", {players: nq.length});
+        }
+      } catch(e){
+      }
+    }
   });
   
 });
