@@ -33,21 +33,34 @@ var game = require("./engine/game.js");
 var map = require("./engine/map.js");
 var Input = require("./engine/input.js").Input;
 
-var queue = [];
+var queue = {
+  
+};
+
+queue[2] = {};
+queue[3] = {};
+queue[4] = {};
 
 websocket.set('log level', 1);
 websocket.sockets.on("connection", function(socket){
   console.log("Client connect");
   
   socket.on("init", function(data){
+    var players = parseInt(data.players);
+    if(players < 2 || players > 4) players = 2;
+    var roomName = data.name || "default";
     socket.emit("settings", {
       GAME_SZ: constants.GAME_SZ,
       PLAYER_SZ: constants.PLAYER_SZ,
       TILE_SZ: constants.TILE_SZ
     });
-    queue.push(socket);
-    if(queue.length == 2){
-      startGame();
+    var q = queue[players][roomName];
+    if(q == undefined){
+      q = queue[players][roomName] = [];
+    }
+    q.push(socket);
+    if(q.length == players){
+      startGame(players, roomName);
     }
   });
   
@@ -57,9 +70,9 @@ websocket.sockets.on("connection", function(socket){
   
 });
 
-function startGame(){
-  var players = queue;
-  queue = [];
+function startGame(pc, roomName){
+  var players = queue[pc][roomName];
+  delete queue[pc][roomName];
   var inputs = [];
   var inputMap = {};
   for(var i = 0; i<players.length; i++){
